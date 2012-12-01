@@ -1376,7 +1376,7 @@ namespace miniMIPS
         {
             string code = Input.Text;
             int ctr = 0;
-            string[] line = code.Split(new char[] {'\n'});
+            string[] line = code.Split(new char[] { '\n' });
             try
             {
                 while (line[ctr] != null)
@@ -1390,7 +1390,7 @@ namespace miniMIPS
                 string count = label1.Text;
                 ctr = Convert.ToInt32(count);
                 ctr += 1;
-                checkSyntax(line,ctr);
+                checkSyntax(line, ctr);
             }
         }
 
