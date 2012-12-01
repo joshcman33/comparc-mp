@@ -72,6 +72,8 @@ namespace miniMIPS
             this.dataGridView1.Rows[28].Cells[0].Value = "R29";
             this.dataGridView1.Rows[29].Cells[0].Value = "R30";
             this.dataGridView1.Rows[30].Cells[0].Value = "R31";
+            for (int i = 0; i < 31; i++ )
+                this.dataGridView1.Rows[i].Cells[1].Value = "0000000000000000";
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -88,9 +90,72 @@ namespace miniMIPS
         {
          
         }
-        private void wala() 
-        { 
+        private void operations(string oper, string destination, string sourceA, string sourceB, string offset, string immediate) 
+        {
+            int dest = Convert.ToInt32(destination);
+            int sA = Convert.ToInt32(sourceA);
+            int sB = Convert.ToInt32(sourceB);
+            int off;
+            if (offset == null)
+            {
+                off = 0;
+            }
+            else
+            {
+                off = int.Parse(offset, System.Globalization.NumberStyles.HexNumber);
+            }
+            int imm;
+            if (immediate != null)
+            {
+                imm = int.Parse(immediate, System.Globalization.NumberStyles.HexNumber);
+            }
+            else
+                imm = 0;
+            Int64 sAval;
+            Int64 sBval;
+            if (sA == 0)
+                sAval = 0;
+            else
+            sAval = Int64.Parse(dataGridView1.Rows[sA-1].Cells[1].Value.ToString(),System.Globalization.NumberStyles.HexNumber);
+            if (sB == 0|| sB==null)
+                sBval = 0;
+            else
+            sBval = Int64.Parse(dataGridView1.Rows[sB - 1].Cells[1].Value.ToString(),System.Globalization.NumberStyles.HexNumber);
+            Int64 desti;
+            //int dest = int.Parse(offset, System.Globalization.NumberStyles.HexNumber); 
+            switch (oper)
+            {
+                
+                case "DADD":
+                    desti = sAval + sBval;
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti,16).ToUpper();
+                    break;
+                case "SLT":
+                    if (sAval < sBval)
+                        dataGridView1.Rows[dest - 1].Cells[1].Value = "0000000000000001";
+                    else
+                        dataGridView1.Rows[dest - 1].Cells[1].Value = "0000000000000000";
+                    break;
+                case "DADDI":
+                    desti = sAval + imm;
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    break;
+                case "LD":
+                    break;
+                case "XOR":
+                    desti = sAval ^ sBval;
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    break;
+                case "OR":
+                    desti = sAval | sBval;
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    break;
+                case "DSUB":
+                    desti = sAval - sBval;
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    break;
 
+            }
         }
         private void IFconversion(string oper, string destination, string sourceA, string sourceB, string offset, string immediate)
         {
@@ -103,6 +168,7 @@ namespace miniMIPS
             int x = Convert.ToInt32(destination);
             int y = Convert.ToInt32(sourceA);
             int z = Convert.ToInt32(sourceB);
+            
 
             switch (oper)
             {
@@ -514,6 +580,7 @@ namespace miniMIPS
             string[] sourceBReg = new string[10];
             string[] offset = new string[10];
             string[] immediate = new string[10];
+            string[] imm = new string[10];
 
            while (counter < ctr)
            {
@@ -1306,7 +1373,33 @@ namespace miniMIPS
                             }
 
                             destination[counter] = destination[counter].ToUpper();
-                            ic += 2;
+                            if (destination[counter][0] == 'R')
+                            {
+                                int x = destination[counter].IndexOf("R") + 1;
+                                
+                                destReg[counter] = destination[counter].Substring(x);
+                            int y = Convert.ToInt32(destReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if(destReg[counter][0]== '0')
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else 
+                                {
+                                    ic += 2;
+                                }
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+
+                            }
 
                             while (compare[ic] != ',')
                             {
@@ -1315,7 +1408,33 @@ namespace miniMIPS
                             }
 
                             sourceA[counter] = sourceA[counter].ToUpper();
-                            ic += 2;
+                            if (sourceA[counter][0] == 'R')
+                            {
+                                int x = sourceA[counter].IndexOf("R") + 1;
+                                sourceAReg[counter] = sourceA[counter].Substring(x);
+                                int y = Convert.ToInt32(sourceAReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
+                                {
+                                
+                                        check--;
+                                        break;
+                                }
+                                else
+                                {
+                                    ic += 2;
+                                }
+                                                                
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
 
                             while (ic != compare.Length)
                             {
@@ -1324,6 +1443,24 @@ namespace miniMIPS
                             }
 
                             immediate[counter] = immediate[counter].ToUpper();
+                            if (immediate[counter][0] == '#')
+                            {
+                                int x = immediate[counter].IndexOf("#") + 1;
+                                imm[counter] = immediate[counter].Substring(x);
+                                int y = int.Parse(imm[counter],System.Globalization.NumberStyles.HexNumber);
+                                if (y > 1048575)
+                                {
+                                    check--;
+                                    break;
+                                }
+                              
+                               
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
                         }
                         break;
                     case "J":
@@ -1361,14 +1498,15 @@ namespace miniMIPS
                    Output.Text += "Offset: " + offset[i] + Environment.NewLine;
                    Output.Text += "Immediate: " + immediate[i] + Environment.NewLine;
                    Output.Text += "Destination Register:" + destReg[i] + Environment.NewLine;
-                   IFconversion(oper[i], destReg[i], sourceAReg[i], sourceBReg[i], offset[i], immediate[i]);
+                   IFconversion(oper[i], destReg[i], sourceAReg[i], sourceBReg[i], offset[i], imm[i]);
+                   operations(oper[i], destReg[i], sourceAReg[i], sourceBReg[i], offset[i], imm[i]);
                    i++;
                }
                
            }
            else
            {
-               MessageBox.Show("Syntax error encountered.");
+               textBox1.Text = "Syntax error encountered";
            }
         }
 
@@ -1397,11 +1535,17 @@ namespace miniMIPS
         private void Compile_Click(object sender, EventArgs e)
         {
             Output.Text = "";
+            textBox1.Text = "";
            
             readInput();
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
         {
 
         }
