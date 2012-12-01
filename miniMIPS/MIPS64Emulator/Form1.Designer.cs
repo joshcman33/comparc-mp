@@ -92,7 +92,7 @@
             this.Column2});
             this.dataGridView1.Location = new System.Drawing.Point(-4, 0);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(243, 313);
+            this.dataGridView1.Size = new System.Drawing.Size(260, 313);
             this.dataGridView1.TabIndex = 3;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
@@ -124,7 +124,7 @@
             this.tabControl1.Location = new System.Drawing.Point(674, 13);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(246, 332);
+            this.tabControl1.Size = new System.Drawing.Size(264, 332);
             this.tabControl1.TabIndex = 5;
             // 
             // tabPage1
@@ -133,7 +133,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(238, 306);
+            this.tabPage1.Size = new System.Drawing.Size(256, 306);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Registers";
             this.tabPage1.UseVisualStyleBackColor = true;
