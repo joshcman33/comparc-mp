@@ -74,6 +74,12 @@ namespace miniMIPS
             this.dataGridView1.Rows[30].Cells[0].Value = "R31";
             for (int i = 0; i < 31; i++ )
                 this.dataGridView1.Rows[i].Cells[1].Value = "0000000000000000";
+            for (int i = 0; i < 65536; i+=4)
+            {
+                this.dataGridView2.Rows.Add();
+                this.dataGridView2.Rows[i/4].Cells[0].Value = Convert.ToString(i,16);
+                
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -141,6 +147,15 @@ namespace miniMIPS
                     dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
                     break;
                 case "LD":
+                    desti = off + sAval;
+                    int destin = Convert.ToInt32(desti);
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = dataGridView2.Rows[destin / 4].Cells[1].Value; 
+                    break;
+                case "SD":
+                    desti = off + sAval;
+                    int destina = Convert.ToInt32(desti);
+                    dataGridView2.Rows[destina / 4].Cells[1].Value = dataGridView1.Rows[dest - 1].Cells[1].Value;
+
                     break;
                 case "XOR":
                     desti = sAval ^ sBval;
@@ -1158,7 +1173,7 @@ namespace miniMIPS
                         break;
                     case "LD":
                         {
-                       while (compare[ic] != ',')
+                            while (compare[ic] != ',')
                             {
                                 destination[counter] += compare[ic];
                                 ic++;
@@ -1196,6 +1211,36 @@ namespace miniMIPS
                             {
                                 while (compare[ic] != '(')
                                 {
+                                    offset[counter] += compare[ic];
+                                    ic++;
+                                }
+                            }
+                            catch
+                            {
+                                check--;
+                            }
+
+                            offset[counter] = offset[counter].ToUpper();
+
+                                offset[counter] = offset[counter];
+                                int a = int.Parse(offset[counter], System.Globalization.NumberStyles.HexNumber);
+                                if (a > 16 * 16 * 16 * 16)
+                                {
+                                    check--;
+                                    break;
+                                }
+
+                                else
+                                {
+                                    ic++;
+                                }
+
+          
+
+                            try
+                            {
+                                while (compare[ic] != ')')
+                                {
                                     sourceA[counter] += compare[ic];
                                     ic++;
                                 }
@@ -1210,7 +1255,7 @@ namespace miniMIPS
                             {
                                 int x = sourceA[counter].IndexOf("R") + 1;
                                 sourceAReg[counter] = sourceA[counter].Substring(x);
-                                int y = Convert.ToInt32(sourceAReg[counter]);
+                                int y = Convert.ToInt32(sourceBReg[counter]);
                                 if (y > 31)
                                 {
                                     check--;
@@ -1222,10 +1267,6 @@ namespace miniMIPS
                                     check--;
                                     break;
                                 }
-                                else
-                                {
-                                    ic ++;
-                                }
 
                             }
                             else
@@ -1233,32 +1274,8 @@ namespace miniMIPS
                                 check--;
                                 break;
                             }
-
-                            try
-                            {
-                                while (compare[ic] != ')')
-                                {
-                                    offset[counter] += compare[ic];
-                                    ic++;
-                                }
-                            }
-                            catch
-                            {
-                                check--;
-                            }
-
-                            offset[counter] = offset[counter].ToUpper();
-                            int a = offset[counter].Length;
-                            if (offset[counter].Length != 4)
-                            {
-                                check--;
-                                break;
-                            }
-                            else
-                            {
-                            }
+                            break;
                         }
-                        break;
 
                     case "SD":
                         {
@@ -1300,6 +1317,36 @@ namespace miniMIPS
                             {
                                 while (compare[ic] != '(')
                                 {
+                                    offset[counter] += compare[ic];
+                                    ic++;
+                                }
+                            }
+                            catch
+                            {
+                                check--;
+                            }
+
+                            offset[counter] = offset[counter].ToUpper();
+
+                            offset[counter] = offset[counter];
+                            int a = int.Parse(offset[counter], System.Globalization.NumberStyles.HexNumber);
+                            if (a > 16 * 16 * 16 * 16)
+                            {
+                                check--;
+                                break;
+                            }
+
+                            else
+                            {
+                                ic++;
+                            }
+
+
+
+                            try
+                            {
+                                while (compare[ic] != ')')
+                                {
                                     sourceA[counter] += compare[ic];
                                     ic++;
                                 }
@@ -1314,7 +1361,7 @@ namespace miniMIPS
                             {
                                 int x = sourceA[counter].IndexOf("R") + 1;
                                 sourceAReg[counter] = sourceA[counter].Substring(x);
-                                int y = Convert.ToInt32(sourceAReg[counter]);
+                                int y = Convert.ToInt32(sourceBReg[counter]);
                                 if (y > 31)
                                 {
                                     check--;
@@ -1326,44 +1373,16 @@ namespace miniMIPS
                                     check--;
                                     break;
                                 }
-                                else
-                                {
-                                    ic++;
-                                }
 
                             }
                             else
                             {
                                 check--;
                                 break;
-                            }
-
-
-                            try
-                            {
-                                while (compare[ic] != ')')
-                                {
-                                    offset[counter] += compare[ic];
-                                    ic++;
-                                }
-                            }
-                            catch
-                            {
-                                check--;
-                            }
-
-                            offset[counter] = offset[counter].ToUpper();
-                            int a = offset[counter].Length;
-                            if (offset[counter].Length != 4)
-                            {
-                                check--;
-                                break;
-                            }
-                            else
-                            {
                             }
                             break;
                         }
+
                     case "DADDI":
                         {
                             while (compare[ic] != ',')
