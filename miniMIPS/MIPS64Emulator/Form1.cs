@@ -74,10 +74,10 @@ namespace miniMIPS
             this.dataGridView1.Rows[30].Cells[0].Value = "R31";
             for (int i = 0; i < 31; i++ )
                 this.dataGridView1.Rows[i].Cells[1].Value = "0000000000000000";
-            for (int i = 0; i < 65536; i+=4)
+            for (int i = 0; i < 500; i++)
             {
                 this.dataGridView2.Rows.Add();
-                this.dataGridView2.Rows[i/4].Cells[0].Value = Convert.ToString(i,16);
+                this.dataGridView2.Rows[i].Cells[0].Value = Convert.ToString(i,16).PadLeft(4,'0');
                 
             }
         }
@@ -149,7 +149,13 @@ namespace miniMIPS
                 case "LD":
                     desti = off + sAval;
                     int destin = Convert.ToInt32(desti);
-                    dataGridView1.Rows[dest - 1].Cells[1].Value = dataGridView2.Rows[destin / 4].Cells[1].Value; 
+                    string output;
+                    output = dataGridView2.Rows[destin].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin+1].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin+2].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin+3].Cells[1].Value.ToString();
+                    dataGridView1.Rows[dest - 1].Cells[1].Value =output;
+                    
                     break;
                 case "SD":
                     desti = off + sAval;
