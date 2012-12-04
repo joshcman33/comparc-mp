@@ -123,19 +123,36 @@ namespace miniMIPS
             if (sA == 0)
                 sAval = 0;
             else
-            sAval = Int64.Parse(dataGridView1.Rows[sA-1].Cells[1].Value.ToString(),System.Globalization.NumberStyles.HexNumber);
+                dataGridView1.Rows[sA - 1].Cells[1].Value = dataGridView1.Rows[sA - 1].Cells[1].Value.ToString().PadLeft(16, '0');
+            try
+            {
+                sAval = Int64.Parse(dataGridView1.Rows[sA - 1].Cells[1].Value.ToString(), System.Globalization.NumberStyles.HexNumber);
+            }
+            catch
+            {
+                this.textBox1.Text = "Source Value Invalid" + Environment.NewLine;
+                sAval = 0;
+            }
             if (sB == 0|| sB==null)
                 sBval = 0;
             else
-            sBval = Int64.Parse(dataGridView1.Rows[sB - 1].Cells[1].Value.ToString(),System.Globalization.NumberStyles.HexNumber);
-            Int64 desti;
+                try
+                {
+                    sBval = Int64.Parse(dataGridView1.Rows[sB - 1].Cells[1].Value.ToString(), System.Globalization.NumberStyles.HexNumber);
+                }
+                catch
+                {
+                    sBval = 0;
+                }
+               Int64 desti;
             //int dest = int.Parse(offset, System.Globalization.NumberStyles.HexNumber); 
             switch (oper)
             {
                 
                 case "DADD":
                     desti = sAval + sBval;
-                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti,16).ToUpper();
+                    
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti,16).PadLeft(16,'0').ToUpper();
                     
                     break;
                 case "SLT":
@@ -147,7 +164,7 @@ namespace miniMIPS
                     break;
                 case "DADDI":
                     desti = sAval + imm;
-                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).PadLeft(16,'0').ToUpper();
                     
                     break;
                 case "LD":
@@ -158,29 +175,53 @@ namespace miniMIPS
                     output += dataGridView2.Rows[destin+1].Cells[1].Value.ToString();
                     output += dataGridView2.Rows[destin+2].Cells[1].Value.ToString();
                     output += dataGridView2.Rows[destin+3].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin + 4].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin + 5].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin + 6].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin + 7].Cells[1].Value.ToString();
                     dataGridView1.Rows[dest - 1].Cells[1].Value =output;
                     
                     break;
                 case "SD":
                     desti = off + sAval;
                     int destina = Convert.ToInt32(desti);
-                    dataGridView2.Rows[destina / 4].Cells[1].Value = dataGridView1.Rows[dest - 1].Cells[1].Value;
-                    
+                    string val;
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().PadLeft(16, '0');
+                    //dataGridView2.Rows[destina].Cells[1].Value = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString()[0];
+                    //dataGridView2.Rows[destina].Cells[1].Value += dataGridView1.Rows[dest - 1].Cells[1].Value.ToString()[1];
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(0,2);
+                    dataGridView2.Rows[destina].Cells[1].Value = val;
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(2,2);
+                    dataGridView2.Rows[destina+1].Cells[1].Value = val;
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(4,2);
+                    dataGridView2.Rows[destina+2].Cells[1].Value = val;
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(6,2);
+                    dataGridView2.Rows[destina+3].Cells[1].Value = val;
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(8,2);
+                    dataGridView2.Rows[destina+4].Cells[1].Value = val;
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(10,2);
+                    dataGridView2.Rows[destina+5].Cells[1].Value = val;
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(12,2);
+                    dataGridView2.Rows[destina+6].Cells[1].Value = val;
+                    val = dataGridView1.Rows[dest - 1].Cells[1].Value.ToString().Substring(14,2);
+                    dataGridView2.Rows[destina+7].Cells[1].Value = val;
                     break;
                 case "XOR":
                     desti = sAval ^ sBval;
-                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).PadLeft(16, '0').ToUpper();
                     
                     break;
                 case "OR":
                     desti = sAval | sBval;
-                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).PadLeft(16, '0').ToUpper();
                     
                     break;
                 case "DSUB":
                     desti = sAval - sBval;
-                    dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
-                    
+                    if(desti<0)
+                        dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).PadLeft(16, 'F').ToUpper();
+                    else
+                        dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).PadLeft(16, '0').ToUpper();
                     break;
 
             }
@@ -539,7 +580,7 @@ namespace miniMIPS
                     opcode += Convert.ToString(y, 2);
                     opcode += " ";
                     int num = int.Parse(offset, System.Globalization.NumberStyles.HexNumber);
-                    opcode += Convert.ToString(num, 2);
+                    opcode += Convert.ToString(num, 2).PadLeft(16, '0');
                     break;
                 case "SD":
                     opcode = "111111 ";
@@ -580,7 +621,7 @@ namespace miniMIPS
                     opcode += Convert.ToString(y, 2);
                     opcode += " ";
                     num = int.Parse(offset, System.Globalization.NumberStyles.HexNumber);
-                    opcode += Convert.ToString(num, 2);
+                    opcode += Convert.ToString(num, 2).PadLeft(16,'0');
                     break;
                     
                 case "DADDI":
@@ -1504,13 +1545,19 @@ namespace miniMIPS
                             {
                                 int x = immediate[counter].IndexOf("#") + 1;
                                 imm[counter] = immediate[counter].Substring(x);
-                                int y = int.Parse(imm[counter], System.Globalization.NumberStyles.HexNumber);
-                                if (y > 1048575)
+                                try
+                                {
+                                    int y = int.Parse(imm[counter], System.Globalization.NumberStyles.HexNumber);
+                                    if (y > 1048575)
+                                    {
+                                        check--;
+                                        break;
+                                    }
+                                }
+                                catch 
                                 {
                                     check--;
-                                    break;
                                 }
-
 
                             }
                             else
