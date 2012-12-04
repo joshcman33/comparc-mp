@@ -74,10 +74,11 @@ namespace miniMIPS
             this.dataGridView1.Rows[30].Cells[0].Value = "R31";
             for (int i = 0; i < 31; i++ )
                 this.dataGridView1.Rows[i].Cells[1].Value = "0000000000000000";
-            for (int i = 0; i < 65536; i+=4)
+            for (int i = 0; i < 500; i++)
             {
                 this.dataGridView2.Rows.Add();
-                this.dataGridView2.Rows[i/4].Cells[0].Value = Convert.ToString(i,16);
+                this.dataGridView2.Rows[i].Cells[0].Value = Convert.ToString(i,16).PadLeft(4,'0');
+                this.dataGridView2.Rows[i].Cells[1].Value = "00";
                 
             }
         }
@@ -135,39 +136,51 @@ namespace miniMIPS
                 case "DADD":
                     desti = sAval + sBval;
                     dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti,16).ToUpper();
+                    
                     break;
                 case "SLT":
                     if (sAval < sBval)
                         dataGridView1.Rows[dest - 1].Cells[1].Value = "0000000000000001";
                     else
                         dataGridView1.Rows[dest - 1].Cells[1].Value = "0000000000000000";
+                    
                     break;
                 case "DADDI":
                     desti = sAval + imm;
                     dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    
                     break;
                 case "LD":
                     desti = off + sAval;
                     int destin = Convert.ToInt32(desti);
-                    dataGridView1.Rows[dest - 1].Cells[1].Value = dataGridView2.Rows[destin / 4].Cells[1].Value; 
+                    string output;
+                    output = dataGridView2.Rows[destin].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin+1].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin+2].Cells[1].Value.ToString();
+                    output += dataGridView2.Rows[destin+3].Cells[1].Value.ToString();
+                    dataGridView1.Rows[dest - 1].Cells[1].Value =output;
+                    
                     break;
                 case "SD":
                     desti = off + sAval;
                     int destina = Convert.ToInt32(desti);
                     dataGridView2.Rows[destina / 4].Cells[1].Value = dataGridView1.Rows[dest - 1].Cells[1].Value;
-
+                    
                     break;
                 case "XOR":
                     desti = sAval ^ sBval;
                     dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    
                     break;
                 case "OR":
                     desti = sAval | sBval;
                     dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    
                     break;
                 case "DSUB":
                     desti = sAval - sBval;
                     dataGridView1.Rows[dest - 1].Cells[1].Value = Convert.ToString(desti, 16).ToUpper();
+                    
                     break;
 
             }
@@ -596,167 +609,32 @@ namespace miniMIPS
             string[] offset = new string[10];
             string[] immediate = new string[10];
             string[] imm = new string[10];
+            int magic = 0;
+            int[] alecmagic = new int[1000];
+            alecmagic[magic] = -4;
+            while (counter < ctr)
+            {
+                string compare = line[counter];
+                int ic = 0;
+                try
+                {
+                    while (compare[ic] != ' ')
+                    {
+                        oper[counter] += compare[ic];
+                        ic++;
+                    }
 
-           while (counter < ctr)
-           {
-               string compare = line[counter];
-               int ic = 0;
-               while (compare[ic] != ' ')
-               {
-                    oper[counter] += compare[ic];
+                    oper[counter] = oper[counter].ToUpper();
                     ic++;
-               }
-
-               oper[counter] = oper[counter].ToUpper();
-               ic++;
-
-               switch (oper[counter])
-               {
+                }
+                catch
+                {
+                    check--;
+                }
+                switch (oper[counter])
+                {
                     case "DADD":
-                       {
-                           while (compare[ic] != ',')
-                           {
-                               destination[counter] += compare[ic];
-                               ic++;
-                           }
-
-                           destination[counter] = destination[counter].ToUpper();
-                           if (destination[counter][0] == 'R')
-                           {
-                               int x = destination[counter].IndexOf("R") + 1;
-
-                               destReg[counter] = destination[counter].Substring(x);
-                               int y = Convert.ToInt32(destReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (destReg[counter][0] == '0')
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else
-                               {
-                                   ic += 2;
-                               }
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-
-                           }
-
-                           while (compare[ic] != ',')
-                           {
-                               sourceA[counter] += compare[ic];
-                               ic++;
-                           }
-
-                           sourceA[counter] = sourceA[counter].ToUpper();
-                           if (sourceA[counter][0] == 'R')
-                           {
-                               int x = sourceA[counter].IndexOf("R") + 1;
-                               sourceAReg[counter] = sourceA[counter].Substring(x);
-                               int y = Convert.ToInt32(sourceAReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
-                               {
-
-                                   check--;
-                                   break;
-                               }
-                               else
-                               {
-                                   ic += 2;
-                               }
-
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
-
-                           while (ic != compare.Length)
-                           {
-                               sourceB[counter] += compare[ic];
-                               ic++;
-                           }
-
-                           sourceB[counter] = sourceB[counter].ToUpper();
-                           if (sourceB[counter][0] == 'R')
-                           {
-                               int x = sourceB[counter].IndexOf("R") + 1;
-                               sourceBReg[counter] = sourceB[counter].Substring(x);
-                               int y = Convert.ToInt32(sourceBReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (sourceBReg[counter].Length == 2 && sourceBReg[counter][0] == '0')
-                               {
-
-                                   check--;
-                                   break;
-                               }
-
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
-                       }
-                       break;
-                    case "BNEZ":
-                       {
-                           while (compare[ic] != ',')
-                           {
-                               sourceA[counter] += compare[ic];
-                               ic++;
-                           }
-
-                           sourceA[counter] = sourceA[counter].ToUpper();
-                           if (sourceA[counter][0] == 'R')
-                           {
-                               ic += 2;
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
-
-
-
-                           while (ic != compare.Length)
-                           {
-                               offset[counter] += compare[ic];
-
-                               ic++;
-                           }
-
-                           offset[counter] = offset[counter].ToUpper();
-                           if (offset[counter][0] == 'L')
-                           {
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
-                       }
-                       break;
-                    case "DSUB":
-                       {
+                        {
                             while (compare[ic] != ',')
                             {
                                 destination[counter] += compare[ic];
@@ -767,20 +645,20 @@ namespace miniMIPS
                             if (destination[counter][0] == 'R')
                             {
                                 int x = destination[counter].IndexOf("R") + 1;
-                                
+
                                 destReg[counter] = destination[counter].Substring(x);
-                            int y = Convert.ToInt32(destReg[counter]);
+                                int y = Convert.ToInt32(destReg[counter]);
                                 if (y > 31)
                                 {
                                     check--;
                                     break;
                                 }
-                                else if(destReg[counter][0]== '0')
+                                else if (destReg[counter][0] == '0')
                                 {
                                     check--;
                                     break;
                                 }
-                                else 
+                                else
                                 {
                                     ic += 2;
                                 }
@@ -811,15 +689,15 @@ namespace miniMIPS
                                 }
                                 else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
                                 {
-                                
-                                        check--;
-                                        break;
+
+                                    check--;
+                                    break;
                                 }
                                 else
                                 {
                                     ic += 2;
                                 }
-                                                                
+
                             }
                             else
                             {
@@ -850,7 +728,150 @@ namespace miniMIPS
                                     check--;
                                     break;
                                 }
-                               
+
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
+                        }
+                        break;
+                    case "BNEZ":
+                        {
+                            while (compare[ic] != ',')
+                            {
+                                sourceA[counter] += compare[ic];
+                                ic++;
+                            }
+
+                            sourceA[counter] = sourceA[counter].ToUpper();
+                            if (sourceA[counter][0] == 'R')
+                            {
+                                ic += 2;
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
+
+
+
+                            while (ic != compare.Length)
+                            {
+                                offset[counter] += compare[ic];
+
+                                ic++;
+                            }
+
+                            offset[counter] = offset[counter].ToUpper();
+                            if (offset[counter][0] == 'L')
+                            {
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
+                        }
+                        break;
+                    case "DSUB":
+                        {
+                            while (compare[ic] != ',')
+                            {
+                                destination[counter] += compare[ic];
+                                ic++;
+                            }
+
+                            destination[counter] = destination[counter].ToUpper();
+                            if (destination[counter][0] == 'R')
+                            {
+                                int x = destination[counter].IndexOf("R") + 1;
+
+                                destReg[counter] = destination[counter].Substring(x);
+                                int y = Convert.ToInt32(destReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (destReg[counter][0] == '0')
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else
+                                {
+                                    ic += 2;
+                                }
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+
+                            }
+
+                            while (compare[ic] != ',')
+                            {
+                                sourceA[counter] += compare[ic];
+                                ic++;
+                            }
+
+                            sourceA[counter] = sourceA[counter].ToUpper();
+                            if (sourceA[counter][0] == 'R')
+                            {
+                                int x = sourceA[counter].IndexOf("R") + 1;
+                                sourceAReg[counter] = sourceA[counter].Substring(x);
+                                int y = Convert.ToInt32(sourceAReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
+                                {
+
+                                    check--;
+                                    break;
+                                }
+                                else
+                                {
+                                    ic += 2;
+                                }
+
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
+
+                            while (ic != compare.Length)
+                            {
+                                sourceB[counter] += compare[ic];
+                                ic++;
+                            }
+
+                            sourceB[counter] = sourceB[counter].ToUpper();
+                            if (sourceB[counter][0] == 'R')
+                            {
+                                int x = sourceB[counter].IndexOf("R") + 1;
+                                sourceBReg[counter] = sourceB[counter].Substring(x);
+                                int y = Convert.ToInt32(sourceBReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (sourceBReg[counter].Length == 2 && sourceBReg[counter][0] == '0')
+                                {
+
+                                    check--;
+                                    break;
+                                }
+
                             }
                             else
                             {
@@ -860,213 +881,213 @@ namespace miniMIPS
                         }
                         break;
                     case "OR":
-                       {
-                           while (compare[ic] != ',')
-                           {
-                               destination[counter] += compare[ic];
-                               ic++;
-                           }
+                        {
+                            while (compare[ic] != ',')
+                            {
+                                destination[counter] += compare[ic];
+                                ic++;
+                            }
 
-                           destination[counter] = destination[counter].ToUpper();
-                           if (destination[counter][0] == 'R')
-                           {
-                               int x = destination[counter].IndexOf("R") + 1;
+                            destination[counter] = destination[counter].ToUpper();
+                            if (destination[counter][0] == 'R')
+                            {
+                                int x = destination[counter].IndexOf("R") + 1;
 
-                               destReg[counter] = destination[counter].Substring(x);
-                               int y = Convert.ToInt32(destReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (destReg[counter][0] == '0')
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else
-                               {
-                                   ic += 2;
-                               }
-                           }
-                           else
-                           {
-                               check--;
-                               break;
+                                destReg[counter] = destination[counter].Substring(x);
+                                int y = Convert.ToInt32(destReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (destReg[counter][0] == '0')
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else
+                                {
+                                    ic += 2;
+                                }
+                            }
+                            else
+                            {
+                                check--;
+                                break;
 
-                           }
+                            }
 
-                           while (compare[ic] != ',')
-                           {
-                               sourceA[counter] += compare[ic];
-                               ic++;
-                           }
+                            while (compare[ic] != ',')
+                            {
+                                sourceA[counter] += compare[ic];
+                                ic++;
+                            }
 
-                           sourceA[counter] = sourceA[counter].ToUpper();
-                           if (sourceA[counter][0] == 'R')
-                           {
-                               int x = sourceA[counter].IndexOf("R") + 1;
-                               sourceAReg[counter] = sourceA[counter].Substring(x);
-                               int y = Convert.ToInt32(sourceAReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
-                               {
+                            sourceA[counter] = sourceA[counter].ToUpper();
+                            if (sourceA[counter][0] == 'R')
+                            {
+                                int x = sourceA[counter].IndexOf("R") + 1;
+                                sourceAReg[counter] = sourceA[counter].Substring(x);
+                                int y = Convert.ToInt32(sourceAReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
+                                {
 
-                                   check--;
-                                   break;
-                               }
-                               else
-                               {
-                                   ic += 2;
-                               }
+                                    check--;
+                                    break;
+                                }
+                                else
+                                {
+                                    ic += 2;
+                                }
 
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
 
-                           while (ic != compare.Length)
-                           {
-                               sourceB[counter] += compare[ic];
-                               ic++;
-                           }
+                            while (ic != compare.Length)
+                            {
+                                sourceB[counter] += compare[ic];
+                                ic++;
+                            }
 
-                           sourceB[counter] = sourceB[counter].ToUpper();
-                           if (sourceB[counter][0] == 'R')
-                           {
-                               int x = sourceB[counter].IndexOf("R") + 1;
-                               sourceBReg[counter] = sourceB[counter].Substring(x);
-                               int y = Convert.ToInt32(sourceBReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (sourceBReg[counter].Length == 2 && sourceBReg[counter][0] == '0')
-                               {
+                            sourceB[counter] = sourceB[counter].ToUpper();
+                            if (sourceB[counter][0] == 'R')
+                            {
+                                int x = sourceB[counter].IndexOf("R") + 1;
+                                sourceBReg[counter] = sourceB[counter].Substring(x);
+                                int y = Convert.ToInt32(sourceBReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (sourceBReg[counter].Length == 2 && sourceBReg[counter][0] == '0')
+                                {
 
-                                   check--;
-                                   break;
-                               }
+                                    check--;
+                                    break;
+                                }
 
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
-                       }
-                       break;
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
+                        }
+                        break;
                     case "XOR":
-                       {
-                           while (compare[ic] != ',')
-                           {
-                               destination[counter] += compare[ic];
-                               ic++;
-                           }
+                        {
+                            while (compare[ic] != ',')
+                            {
+                                destination[counter] += compare[ic];
+                                ic++;
+                            }
 
-                           destination[counter] = destination[counter].ToUpper();
-                           if (destination[counter][0] == 'R')
-                           {
-                               int x = destination[counter].IndexOf("R") + 1;
+                            destination[counter] = destination[counter].ToUpper();
+                            if (destination[counter][0] == 'R')
+                            {
+                                int x = destination[counter].IndexOf("R") + 1;
 
-                               destReg[counter] = destination[counter].Substring(x);
-                               int y = Convert.ToInt32(destReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (destReg[counter][0] == '0')
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else
-                               {
-                                   ic += 2;
-                               }
-                           }
-                           else
-                           {
-                               check--;
-                               break;
+                                destReg[counter] = destination[counter].Substring(x);
+                                int y = Convert.ToInt32(destReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (destReg[counter][0] == '0')
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else
+                                {
+                                    ic += 2;
+                                }
+                            }
+                            else
+                            {
+                                check--;
+                                break;
 
-                           }
+                            }
 
-                           while (compare[ic] != ',')
-                           {
-                               sourceA[counter] += compare[ic];
-                               ic++;
-                           }
+                            while (compare[ic] != ',')
+                            {
+                                sourceA[counter] += compare[ic];
+                                ic++;
+                            }
 
-                           sourceA[counter] = sourceA[counter].ToUpper();
-                           if (sourceA[counter][0] == 'R')
-                           {
-                               int x = sourceA[counter].IndexOf("R") + 1;
-                               sourceAReg[counter] = sourceA[counter].Substring(x);
-                               int y = Convert.ToInt32(sourceAReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
-                               {
+                            sourceA[counter] = sourceA[counter].ToUpper();
+                            if (sourceA[counter][0] == 'R')
+                            {
+                                int x = sourceA[counter].IndexOf("R") + 1;
+                                sourceAReg[counter] = sourceA[counter].Substring(x);
+                                int y = Convert.ToInt32(sourceAReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
+                                {
 
-                                   check--;
-                                   break;
-                               }
-                               else
-                               {
-                                   ic += 2;
-                               }
+                                    check--;
+                                    break;
+                                }
+                                else
+                                {
+                                    ic += 2;
+                                }
 
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
 
-                           while (ic != compare.Length)
-                           {
-                               sourceB[counter] += compare[ic];
-                               ic++;
-                           }
+                            while (ic != compare.Length)
+                            {
+                                sourceB[counter] += compare[ic];
+                                ic++;
+                            }
 
-                           sourceB[counter] = sourceB[counter].ToUpper();
-                           if (sourceB[counter][0] == 'R')
-                           {
-                               int x = sourceB[counter].IndexOf("R") + 1;
-                               sourceBReg[counter] = sourceB[counter].Substring(x);
-                               int y = Convert.ToInt32(sourceBReg[counter]);
-                               if (y > 31)
-                               {
-                                   check--;
-                                   break;
-                               }
-                               else if (sourceBReg[counter].Length == 2 && sourceBReg[counter][0] == '0')
-                               {
+                            sourceB[counter] = sourceB[counter].ToUpper();
+                            if (sourceB[counter][0] == 'R')
+                            {
+                                int x = sourceB[counter].IndexOf("R") + 1;
+                                sourceBReg[counter] = sourceB[counter].Substring(x);
+                                int y = Convert.ToInt32(sourceBReg[counter]);
+                                if (y > 31)
+                                {
+                                    check--;
+                                    break;
+                                }
+                                else if (sourceBReg[counter].Length == 2 && sourceBReg[counter][0] == '0')
+                                {
 
-                                   check--;
-                                   break;
-                               }
+                                    check--;
+                                    break;
+                                }
 
-                           }
-                           else
-                           {
-                               check--;
-                               break;
-                           }
-                       }
-                       break;
+                            }
+                            else
+                            {
+                                check--;
+                                break;
+                            }
+                        }
+                        break;
                     case "SLT":
                         {
                             while (compare[ic] != ',')
@@ -1079,20 +1100,20 @@ namespace miniMIPS
                             if (destination[counter][0] == 'R')
                             {
                                 int x = destination[counter].IndexOf("R") + 1;
-                                
+
                                 destReg[counter] = destination[counter].Substring(x);
-                            int y = Convert.ToInt32(destReg[counter]);
+                                int y = Convert.ToInt32(destReg[counter]);
                                 if (y > 31)
                                 {
                                     check--;
                                     break;
                                 }
-                                else if(destReg[counter][0]== '0')
+                                else if (destReg[counter][0] == '0')
                                 {
                                     check--;
                                     break;
                                 }
-                                else 
+                                else
                                 {
                                     ic += 2;
                                 }
@@ -1123,15 +1144,15 @@ namespace miniMIPS
                                 }
                                 else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
                                 {
-                                
-                                        check--;
-                                        break;
+
+                                    check--;
+                                    break;
                                 }
                                 else
                                 {
                                     ic += 2;
                                 }
-                                                                
+
                             }
                             else
                             {
@@ -1162,7 +1183,7 @@ namespace miniMIPS
                                     check--;
                                     break;
                                 }
-                               
+
                             }
                             else
                             {
@@ -1214,6 +1235,10 @@ namespace miniMIPS
                                     offset[counter] += compare[ic];
                                     ic++;
                                 }
+                                if (offset[counter].Length != 4)
+                                {
+                                    check--;
+                                }
                             }
                             catch
                             {
@@ -1222,9 +1247,12 @@ namespace miniMIPS
 
                             offset[counter] = offset[counter].ToUpper();
 
-                                offset[counter] = offset[counter];
+                            offset[counter] = offset[counter];
+                            try
+                            {
                                 int a = int.Parse(offset[counter], System.Globalization.NumberStyles.HexNumber);
-                                if (a > 16 * 16 * 16 * 16)
+
+                                if (a >= 65536)
                                 {
                                     check--;
                                     break;
@@ -1234,8 +1262,12 @@ namespace miniMIPS
                                 {
                                     ic++;
                                 }
+                            }
+                            catch
+                            {
+                                check--;
+                            }
 
-          
 
                             try
                             {
@@ -1329,18 +1361,24 @@ namespace miniMIPS
                             offset[counter] = offset[counter].ToUpper();
 
                             offset[counter] = offset[counter];
-                            int a = int.Parse(offset[counter], System.Globalization.NumberStyles.HexNumber);
-                            if (a > 16 * 16 * 16 * 16)
+                            try
+                            {
+                                int a = int.Parse(offset[counter], System.Globalization.NumberStyles.HexNumber);
+                                if (a > 16 * 16 * 16 * 16)
+                                {
+                                    check--;
+                                    break;
+                                }
+
+                                else
+                                {
+                                    ic++;
+                                }
+                            }
+                            catch
                             {
                                 check--;
-                                break;
                             }
-
-                            else
-                            {
-                                ic++;
-                            }
-
 
 
                             try
@@ -1395,20 +1433,20 @@ namespace miniMIPS
                             if (destination[counter][0] == 'R')
                             {
                                 int x = destination[counter].IndexOf("R") + 1;
-                                
+
                                 destReg[counter] = destination[counter].Substring(x);
-                            int y = Convert.ToInt32(destReg[counter]);
+                                int y = Convert.ToInt32(destReg[counter]);
                                 if (y > 31)
                                 {
                                     check--;
                                     break;
                                 }
-                                else if(destReg[counter][0]== '0')
+                                else if (destReg[counter][0] == '0')
                                 {
                                     check--;
                                     break;
                                 }
-                                else 
+                                else
                                 {
                                     ic += 2;
                                 }
@@ -1439,15 +1477,15 @@ namespace miniMIPS
                                 }
                                 else if (sourceAReg[counter].Length == 2 && sourceAReg[counter][0] == '0')
                                 {
-                                
-                                        check--;
-                                        break;
+
+                                    check--;
+                                    break;
                                 }
                                 else
                                 {
                                     ic += 2;
                                 }
-                                                                
+
                             }
                             else
                             {
@@ -1466,14 +1504,14 @@ namespace miniMIPS
                             {
                                 int x = immediate[counter].IndexOf("#") + 1;
                                 imm[counter] = immediate[counter].Substring(x);
-                                int y = int.Parse(imm[counter],System.Globalization.NumberStyles.HexNumber);
+                                int y = int.Parse(imm[counter], System.Globalization.NumberStyles.HexNumber);
                                 if (y > 1048575)
                                 {
                                     check--;
                                     break;
                                 }
-                              
-                               
+
+
                             }
                             else
                             {
@@ -1502,32 +1540,44 @@ namespace miniMIPS
                         check--;
                         break;
                 }
-               //IFconversion(oper[counter], destReg[counter], sourceAReg[counter], sourceBReg[counter], offset[counter], immediate[counter]);
+                //IFconversion(oper[counter], destReg[counter], sourceAReg[counter], sourceBReg[counter], offset[counter], immediate[counter]);
                 counter++;
             }
-           if (check == 1)
-           {
-               int i = 0;
-               while (i < ctr)
-               {
-                   Output.Text += "Operator: " + oper[i] + Environment.NewLine;
-                   Output.Text += "RD: " + destination[i] + Environment.NewLine;
-                   Output.Text += "RS: " + sourceA[i] + Environment.NewLine;
-                   Output.Text += "RT: " + sourceB[i] + Environment.NewLine;
-                   Output.Text += "Offset: " + offset[i] + Environment.NewLine;
-                   Output.Text += "Immediate: " + immediate[i] + Environment.NewLine;
-                   Output.Text += "Destination Register:" + destReg[i] + Environment.NewLine;
-                   IFconversion(oper[i], destReg[i], sourceAReg[i], sourceBReg[i], offset[i], imm[i]);
-                   operations(oper[i], destReg[i], sourceAReg[i], sourceBReg[i], offset[i], imm[i]);
-                   i++;
-               }
-               
-           }
-           else
-           {
-               textBox1.Text = "Syntax error encountered";
-           }
+
+
+            int i = 0;
+
+            while (i < ctr)
+            {
+                if (check == 1)
+                {
+                    alecmagic[magic] += 4;
+                    Output.Text += "Operator: " + oper[i] + Environment.NewLine;
+                    Output.Text += "RD: " + destination[i] + Environment.NewLine;
+                    Output.Text += "RS: " + sourceA[i] + Environment.NewLine;
+                    Output.Text += "RT: " + sourceB[i] + Environment.NewLine;
+                    Output.Text += "Offset: " + offset[i] + Environment.NewLine;
+                    Output.Text += "Immediate: " + immediate[i] + Environment.NewLine;
+                    Output.Text += "Destination Register:" + destReg[i] + Environment.NewLine;
+                    Output.Text += "Alec's magic:" + alecmagic[magic] + Environment.NewLine;
+                    IFconversion(oper[i], destReg[i], sourceAReg[i], sourceBReg[i], offset[i], imm[i]);
+                    operations(oper[i], destReg[i], sourceAReg[i], sourceBReg[i], offset[i], imm[i]);
+                }
+
+                else
+                {
+                    int x = i + 1;
+                    textBox1.Text += "Syntax error encountered at line" + x + Environment.NewLine;
+                }
+                i++;
+
+                magic++;
+
+            }
         }
+           
+           
+        
 
         private void readInput()
         {
